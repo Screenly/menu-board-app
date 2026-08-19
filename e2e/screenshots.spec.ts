@@ -9,10 +9,7 @@ import {
 import path from 'path'
 
 const { screenlyJsContent } = createMockScreenlyForScreenshots(
-  {
-    // Screenly Anywhere disables fade animations so items render immediately
-    hardware: undefined,
-  },
+  {},
   {
     menu_title: "Today's Menu",
     currency: '$',
