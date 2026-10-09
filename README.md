@@ -1,5 +1,7 @@
 # Screenly Menu Board App
 
+![Menu Board App Screenshot](/screenshots/1920x1080.webp)
+
 ## Getting Started
 
 ```bash
