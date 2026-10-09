@@ -8,19 +8,39 @@
     <title>Dynamic Menu Board</title>
     <script src="screenly.js?version=1"></script>
   </head>
-  <body>
+  <body
+    class="relative min-h-screen overflow-hidden bg-black text-white font-[Source_Sans_3,sans-serif]"
+  >
     <img
       id="background"
+      class="fixed top-0 left-1/2 z-0 h-full w-1/2 object-cover object-left opacity-70 [filter:brightness(0.7)_contrast(1.2)] print:hidden!"
       alt="Restaurant ambiance background image"
       role="presentation"
     />
-    <div class="container max-w-full">
-      <div class="header">
-        <img id="logo" class="logo" alt="Restaurant logo" />
-        <h1 id="title">Today's Menu</h1>
+    <div
+      class="container relative z-[1] flex min-h-screen max-w-full flex-col pt-8 pr-12 pb-32 pl-12 bg-[linear-gradient(to_right,rgba(0,0,0,0.95)_0%,rgba(0,0,0,0.95)_45%,rgba(0,0,0,0)_100%)] max-[1200px]:pt-6 max-[1200px]:pr-8 max-[1200px]:pb-24 max-[1200px]:pl-8 max-[768px]:pt-4 max-[768px]:pr-6 max-[768px]:pb-20 max-[768px]:pl-6"
+    >
+      <div class="header pointer-events-auto relative mb-6 pt-2 text-center">
+        <img
+          id="logo"
+          class="logo fixed bottom-12 left-8 z-10 hidden h-[60px] w-auto [filter:drop-shadow(0_2px_4px_rgba(0,0,0,0.3))] max-[768px]:bottom-8 max-[768px]:left-4 max-[768px]:h-10 print:hidden!"
+          alt="Restaurant logo"
+        />
+        <h1
+          id="title"
+          class="relative mb-2 py-3 text-center text-[3.5rem] font-[Playfair_Display,serif] font-bold uppercase tracking-[0.5em] text-[var(--accent-color)] [text-shadow:0_2px_4px_rgba(0,0,0,0.4),0_0_30px_var(--purple-tint)] max-[1200px]:text-[2.5rem] max-[768px]:text-[2rem] max-[768px]:tracking-[0.3em]"
+        >
+          Today's Menu
+        </h1>
       </div>
-      <div class="menu-grid" id="menuGrid"></div>
-      <div id="errorState" class="error-state">
+      <div
+        id="menuGrid"
+        class="menu-grid pointer-events-auto grid w-full max-w-[1920px] grid-cols-4 gap-5 px-4 opacity-100 [transition:opacity_0.5s_ease] mx-auto max-[1600px]:grid-cols-3 max-[1200px]:grid-cols-2 max-[1200px]:gap-4 max-[768px]:grid-cols-1"
+      ></div>
+      <div
+        id="errorState"
+        class="error-state hidden p-16 text-center text-[var(--accent-color)]"
+      >
         <h2>Unable to load menu</h2>
         <p>Please check your connection and try again.</p>
       </div>

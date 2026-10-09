@@ -35,25 +35,40 @@ function renderPage(
   const fragment = document.createDocumentFragment()
   pageItems.forEach((item) => {
     const itemElement = document.createElement('div')
-    itemElement.className = 'menu-item'
+    itemElement.className =
+      `menu-item grid grid-cols-[1fr_auto] grid-rows-[auto_1fr_auto] ` +
+      `[grid-template-areas:'title_title'_'desc_price'_'labels_labels'] ` +
+      `items-center gap-3 relative rounded-xl p-5 min-h-[140px] ` +
+      `bg-[rgba(8,8,24,0.95)] backdrop-blur-[10px] border border-white/10 ` +
+      `shadow-[0_4px_30px_rgba(0,0,0,0.3)] [transition:all_0.3s_ease] ` +
+      `hover:border-[rgba(126,44,210,0.3)] ` +
+      `hover:shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(126,44,210,0.2)] ` +
+      `hover:-translate-y-0.5 print:break-inside-avoid ` +
+      `print:[page-break-inside:avoid] max-[1600px]:min-h-[130px] ` +
+      `max-[1200px]:p-4 max-[768px]:min-h-0`
 
     let labelsHtml = ''
     if (item.labels) {
       const labels = item.labels.split(',').map((label) => label.trim())
       labelsHtml = `
-        <div class="labels">
-          ${labels.map((label) => `<span class="label ${label.toLowerCase()}">${escapeHtml(label)}</span>`).join('')}
+        <div class="labels [grid-area:labels] flex flex-wrap gap-[0.4rem] mt-1">
+          ${labels
+            .map(
+              (label) =>
+                `<span class="label ${label.toLowerCase()} text-[0.7rem] px-2 py-[0.2rem] rounded-2xl bg-[var(--purple-tint)] text-[var(--accent-color)] uppercase tracking-[0.05em] font-semibold">${escapeHtml(label)}</span>`,
+            )
+            .join('')}
         </div>
       `
     }
 
     itemElement.innerHTML = `
-      <h2>${escapeHtml(item.name)}</h2>
-      <div class="content">
-        <p>${escapeHtml(item.description)}</p>
+      <h2 class="[grid-area:title] text-2xl mb-1 text-[var(--accent-color)] font-[Playfair_Display,serif] font-semibold [text-shadow:0_2px_4px_rgba(0,0,0,0.4)] max-[1200px]:text-[1.3rem]">${escapeHtml(item.name)}</h2>
+      <div class="content [grid-area:desc] flex items-center">
+        <p class="text-[0.9rem] leading-[1.4] text-white/90 m-0 [text-shadow:0_1px_2px_rgba(0,0,0,0.2)]">${escapeHtml(item.description)}</p>
       </div>
-      <div class="price">
-        <span class="currency">${escapeHtml(currency)}</span>
+      <div class="price [grid-area:price] text-2xl text-[var(--accent-color)] font-[Playfair_Display,serif] font-semibold flex items-center justify-self-end [text-shadow:0_2px_4px_rgba(0,0,0,0.4)] max-[1200px]:text-[1.3rem]">
+        <span class="currency text-[0.8em] mr-[0.1em]">${escapeHtml(currency)}</span>
         ${escapeHtml(item.price)}
       </div>
       ${labelsHtml}
