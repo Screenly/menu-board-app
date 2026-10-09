@@ -9,22 +9,23 @@
     <script src="screenly.js?version=1"></script>
   </head>
   <body>
-    <img
-      id="background"
-      alt="Restaurant ambiance background image"
-      role="presentation"
-    />
-    <div class="container max-w-full">
-      <div class="header">
-        <img id="logo" class="logo" alt="Restaurant logo" />
-        <h1 id="title">Today's Menu</h1>
-      </div>
-      <div class="menu-grid" id="menuGrid"></div>
-      <div id="errorState" class="error-state">
-        <h2>Unable to load menu</h2>
-        <p>Please check your connection and try again.</p>
-      </div>
-    </div>
+    <img id="background" class="backdrop" alt="" />
+    <auto-scaler
+      reference-width="1920"
+      reference-height="1080"
+      orientation="auto"
+      padding="0"
+    >
+      <main class="menu" id="menu">
+        <h1 class="menu-title" id="title">Today's Menu</h1>
+        <ul class="menu-list" id="menuList"></ul>
+        <div class="menu-error">
+          <h2>Unable to load menu</h2>
+          <p>Please check your connection and try again.</p>
+        </div>
+        <img class="menu-logo" id="logo" alt="Restaurant logo" />
+      </main>
+    </auto-scaler>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
