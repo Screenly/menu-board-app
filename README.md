@@ -22,17 +22,17 @@ The app accepts the following settings via `screenly.yml`:
 
 | Setting               | Description                                                                                           | Type               | Default                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------- | ------------------ | --------------------------- |
-| `accent_color`        | Color for highlights and borders                                                                      | optional           | `rgba(255, 255, 255, 0.95)` |
-| `background_image`    | URL to a background image                                                                             | optional           | -                           |
-| `currency`            | Currency symbol to display with prices                                                                | optional           | `$`                         |
-| `display_errors`      | Display detailed error messages on screen                                                             | optional, advanced | `false`                     |
-| `logo_url`            | URL to your restaurant's logo                                                                         | optional           | -                           |
-| `menu_style`          | Typography and styling: `traditional`, `modern` or `minimal`                                          | optional           | `traditional`               |
 | `menu_title`          | The title displayed at the top of the menu                                                            | required           | `Today's Menu`              |
+| `menu_style`          | Typography and styling: `traditional`, `modern` or `minimal`                                          | optional           | `traditional`               |
+| `currency`            | Currency symbol to display with prices                                                                | optional           | `$`                         |
 | `item_XX_description` | Description of menu item XX (where XX is `01`-`12`, zero-padded; e.g., `item_01_description`)         | optional           | -                           |
 | `item_XX_labels`      | Comma-separated labels for menu item XX (e.g., vegetarian, spicy, gluten-free; where XX is `01`-`12`) | optional           | -                           |
 | `item_XX_name`        | Name of menu item XX (where XX is `01`-`12`, zero-padded). Items without a name will be skipped       | optional           | -                           |
 | `item_XX_price`       | Price of menu item XX (where XX is `01`-`12`, zero-padded; e.g., `item_01_price`)                     | optional           | -                           |
+| `accent_color`        | Color for highlights and borders                                                                      | optional, advanced | `rgba(255, 255, 255, 0.95)` |
+| `logo_url`            | URL to your restaurant's logo                                                                         | optional, advanced | -                           |
+| `background_image`    | URL to a background image                                                                             | optional, advanced | -                           |
+| `display_errors`      | Display detailed error messages on screen                                                             | optional, advanced | `false`                     |
 
 ### Default Menu Items
 

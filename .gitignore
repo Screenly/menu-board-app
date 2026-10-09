@@ -5,3 +5,4 @@ dist/
 static/js/*.js
 static/js/*.js.map
 screenshots/*.png
+mock-data.yml
