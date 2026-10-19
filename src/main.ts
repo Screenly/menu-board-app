@@ -1,170 +1,157 @@
 import './css/style.css'
 
 import {
-  getHardware,
   getSettingWithDefault,
   setupErrorHandling,
   signalReady,
 } from '@screenly/edge-apps'
-import { Hardware } from '@screenly/edge-apps'
+// Side-effect import: registers <auto-scaler> as a custom element
+import '@screenly/edge-apps/components'
 import {
-  escapeHtml,
-  calculateItemsPerPage,
-  getMenuItems,
+  DEFAULT_MENU_STYLE,
+  formatLabels,
   getDefaultBackgroundImage,
   getDefaultLogoUrl,
+  getDensity,
+  getMenuItems,
   MenuItem,
+  resolveMenuStyle,
 } from './utils'
 
-/**
- * Renders a specific page of menu items
- */
-function renderPage(
-  page: number,
-  menuItems: MenuItem[],
-  itemsPerPage: number,
-  currency: string,
-): void {
-  const start = page * itemsPerPage
-  const end = start + itemsPerPage
-  const pageItems = menuItems.slice(start, end)
+function createItem(item: MenuItem, currency: string): HTMLLIElement {
+  const element = document.createElement('li')
+  element.className = 'item'
 
-  const menuGrid = document.getElementById('menuGrid')
-  if (!menuGrid) return
+  const name = document.createElement('h2')
+  name.className = 'item-name'
+  name.textContent = item.name
+  element.append(name)
 
-  const fragment = document.createDocumentFragment()
-  pageItems.forEach((item) => {
-    const itemElement = document.createElement('div')
-    itemElement.className = 'menu-item'
-
-    let labelsHtml = ''
-    if (item.labels) {
-      const labels = item.labels.split(',').map((label) => label.trim())
-      labelsHtml = `
-        <div class="labels">
-          ${labels.map((label) => `<span class="label ${label.toLowerCase()}">${escapeHtml(label)}</span>`).join('')}
-        </div>
-      `
-    }
-
-    itemElement.innerHTML = `
-      <h2>${escapeHtml(item.name)}</h2>
-      <div class="content">
-        <p>${escapeHtml(item.description)}</p>
-      </div>
-      <div class="price">
-        <span class="currency">${escapeHtml(currency)}</span>
-        ${escapeHtml(item.price)}
-      </div>
-      ${labelsHtml}
-    `
-    fragment.appendChild(itemElement)
-  })
-
-  // Disable transitions if hardware is Anywhere screen
-  const hardware = getHardware()
-  if (hardware === Hardware.Anywhere) {
-    menuGrid.innerHTML = ''
-    menuGrid.appendChild(fragment)
-  } else {
-    // Fade out, update content, fade in
-    menuGrid.classList.add('fade-out')
-    setTimeout(() => {
-      menuGrid.innerHTML = ''
-      menuGrid.appendChild(fragment)
-      menuGrid.classList.remove('fade-out')
-    }, 500)
+  if (item.price) {
+    const price = document.createElement('p')
+    price.className = 'item-price'
+    const currencySymbol = document.createElement('span')
+    currencySymbol.className = 'item-currency'
+    currencySymbol.textContent = currency
+    price.append(currencySymbol, item.price)
+    element.append(price)
   }
+
+  if (item.description) {
+    const description = document.createElement('p')
+    description.className = 'item-description'
+    description.textContent = item.description
+    element.append(description)
+  }
+
+  const labels = formatLabels(item.labels)
+  if (labels) {
+    const labelList = document.createElement('p')
+    labelList.className = 'item-labels'
+    labelList.textContent = labels
+    element.append(labelList)
+  }
+
+  return element
 }
 
 /**
- * Initializes the menu board application
+ * Renders the whole menu at once. A longer menu is set at a tighter density
+ * rather than split across pages, so nothing waits its turn to be seen.
  */
+function renderMenu(
+  list: HTMLElement,
+  menuItems: MenuItem[],
+  currency: string,
+  isPortrait: boolean,
+): void {
+  const fragment = document.createDocumentFragment()
+  menuItems.forEach((item) => fragment.append(createItem(item, currency)))
+
+  list.className = `menu-list density-${getDensity(menuItems.length, isPortrait)}`
+  list.replaceChildren(fragment)
+}
+
+function setupBackground(): void {
+  const background = document.getElementById('background') as HTMLImageElement
+  if (!background) return
+
+  background.onerror = () => {
+    console.error('Failed to load background image')
+    background.classList.add('is-hidden')
+  }
+  background.src = getSettingWithDefault<string>(
+    'background_image',
+    getDefaultBackgroundImage(),
+  )
+}
+
+function setupLogo(): void {
+  const logo = document.getElementById('logo') as HTMLImageElement
+  if (!logo) return
+
+  const logoUrl = getSettingWithDefault<string>('logo_url', getDefaultLogoUrl())
+  if (!logoUrl) {
+    logo.classList.add('is-hidden')
+    return
+  }
+
+  logo.onerror = () => {
+    console.error('Failed to load logo')
+    logo.classList.add('is-hidden')
+  }
+  logo.src = logoUrl
+}
+
 function initializeMenuBoard(): void {
-  try {
-    const menuTitle = getSettingWithDefault<string>(
+  const menuStyle = resolveMenuStyle(
+    getSettingWithDefault<string>('menu_style', DEFAULT_MENU_STYLE),
+  )
+  document.body.classList.add(`style-${menuStyle}`)
+
+  const accentColor = getSettingWithDefault<string>(
+    'accent_color',
+    'rgb(255 255 255 / 95%)',
+  )
+  // Custom property, not a style override: the customer's colour has to reach
+  // the stylesheet somehow, and this is how the SDK's own theming works
+  document.documentElement.style.setProperty('--accent-color', accentColor)
+
+  setupBackground()
+  setupLogo()
+
+  const title = document.getElementById('title')
+  if (title) {
+    title.textContent = getSettingWithDefault<string>(
       'menu_title',
       "Today's Menu",
     )
-    const accentColor = getSettingWithDefault<string>(
-      'accent_color',
-      'rgba(255, 255, 255, 0.95)',
-    )
-    const backgroundImage = getSettingWithDefault<string>(
-      'background_image',
-      getDefaultBackgroundImage(),
-    )
-    const logoUrl = getSettingWithDefault<string>(
-      'logo_url',
-      getDefaultLogoUrl(),
-    )
-    const currency = getSettingWithDefault<string>('currency', '$')
-
-    // Set custom accent color if provided
-    document.documentElement.style.setProperty('--accent-color', accentColor)
-
-    // Set background image with error handling
-    const bgImage = document.getElementById('background') as HTMLImageElement
-    if (bgImage) {
-      bgImage.onerror = () => {
-        console.error('Failed to load background image')
-        bgImage.style.display = 'none'
-      }
-      bgImage.src = backgroundImage
-      bgImage.style.display = 'block'
-    }
-
-    // Handle logo with error handling
-    const logoElement = document.getElementById('logo') as HTMLImageElement
-    if (logoElement) {
-      logoElement.onerror = () => {
-        console.error('Failed to load logo')
-        logoElement.style.display = 'none'
-        const header = document.querySelector('.header') as HTMLElement
-        if (header) {
-          header.style.marginTop = 'var(--spacing-md)'
-        }
-      }
-      if (logoUrl) {
-        logoElement.src = logoUrl
-        logoElement.style.display = 'block'
-      }
-    }
-
-    // Set menu title
-    const titleElement = document.getElementById('title')
-    if (titleElement) {
-      titleElement.textContent = menuTitle
-    }
-
-    // Get all menu items
-    const menuItems = getMenuItems((key: string) =>
-      getSettingWithDefault<string | undefined>(key, undefined),
-    )
-
-    // Calculate items per page based on viewport
-    const itemsPerPage = calculateItemsPerPage()
-
-    // Initial render
-    renderPage(0, menuItems, itemsPerPage, currency)
-
-    // Signal that the app is ready
-    signalReady()
-  } catch (error) {
-    console.error('Failed to initialize menu board:', error)
-    const errorState = document.getElementById('errorState')
-    const menuGrid = document.getElementById('menuGrid')
-    if (errorState) {
-      errorState.style.display = 'block'
-    }
-    if (menuGrid) {
-      menuGrid.style.display = 'none'
-    }
   }
+
+  const list = document.getElementById('menuList')
+  if (!list) return
+
+  const menuItems = getMenuItems((key: string) =>
+    getSettingWithDefault<string | undefined>(key, undefined),
+  )
+
+  renderMenu(
+    list,
+    menuItems,
+    getSettingWithDefault<string>('currency', '$'),
+    window.innerWidth < window.innerHeight,
+  )
 }
 
-// Initialize when the page loads
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', () => {
   setupErrorHandling()
-  initializeMenuBoard()
+
+  try {
+    initializeMenuBoard()
+  } catch (error) {
+    console.error('Failed to initialize menu board:', error)
+    document.getElementById('menu')?.classList.add('has-error')
+  }
+
+  signalReady()
 })

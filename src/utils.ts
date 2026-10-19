@@ -1,37 +1,70 @@
 import pizzaImage from '../assets/pizza.png'
 import screenlyFoodLogo from '../assets/screenly_food.svg'
 
-const MAX_MENU_ITEMS = 25
+const MAX_MENU_ITEMS = 12
 
 /**
- * Escapes HTML characters to prevent XSS attacks
+ * Largest item count each density can hold on one screen. The whole menu is
+ * always on screen at once, so a longer menu is set tighter rather than paged.
  */
-export function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-/**
- * Calculates how many items should be displayed per page based on viewport width
- */
-export function calculateItemsPerPage(viewportWidth?: number): number {
-  const width = viewportWidth ?? window.innerWidth
-  if (width >= 1920) return 12 // 4 columns * 3 rows
-  if (width >= 1600) return 9 // 3 columns * 3 rows
-  if (width >= 1200) return 6 // 2 columns * 3 rows
-  if (width >= 768) return 3 // 1 columns * 3 rows
-  return 3 // 1 column * 3 rows
-}
+const LANDSCAPE_LIMITS: [Density, number][] = [
+  ['roomy', 4],
+  ['regular', 8],
+]
+const PORTRAIT_LIMITS: [Density, number][] = [
+  ['roomy', 6],
+  ['regular', 8],
+]
 
 export interface MenuItem {
   name: string
   description: string
   price: string
   labels: string
+}
+
+export const MENU_STYLES = ['traditional', 'modern', 'minimal'] as const
+
+export type MenuStyle = (typeof MENU_STYLES)[number]
+
+export const DEFAULT_MENU_STYLE: MenuStyle = 'traditional'
+
+/**
+ * Maps the menu_style setting onto a supported style, falling back to the
+ * default so an unexpected value never leaves a screen unstyled.
+ */
+export function resolveMenuStyle(value: string | undefined): MenuStyle {
+  const candidate = value?.trim().toLowerCase()
+  const match = MENU_STYLES.find((style) => style === candidate)
+
+  return match ?? DEFAULT_MENU_STYLE
+}
+
+export const DENSITIES = ['roomy', 'regular', 'compact'] as const
+
+export type Density = (typeof DENSITIES)[number]
+
+/**
+ * Picks how tightly a menu of this length has to be set to fit the canvas.
+ * Portrait is taller, so it holds more before tightening.
+ */
+export function getDensity(itemCount: number, isPortrait: boolean): Density {
+  const limits = isPortrait ? PORTRAIT_LIMITS : LANDSCAPE_LIMITS
+  const match = limits.find(([, limit]) => itemCount <= limit)
+
+  return match?.[0] ?? 'compact'
+}
+
+/**
+ * Formats a comma-separated label setting for display, e.g.
+ * "vegetarian, gluten-free" becomes "vegetarian · gluten-free"
+ */
+export function formatLabels(labels: string): string {
+  return labels
+    .split(',')
+    .map((label) => label.trim())
+    .filter(Boolean)
+    .join(' · ')
 }
 
 /**
