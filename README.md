@@ -1,3 +1,5 @@
+[![Version](https://img.shields.io/github/v/release/Screenly/menu-board-app)](https://github.com/Screenly/menu-board-app/releases/latest)
+
 # Screenly Menu Board App
 
 ![Menu Board App Screenshot](/screenshots/1920x1080.webp)
